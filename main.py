@@ -15,7 +15,6 @@ def clean():
     print("All documents deleted from Weaviate")
 
 
-
 def upload(file_path:str, chunk_size: int=1000, chunk_overlap:int=0):
     file_name = os.path.basename(file_path)
 
@@ -46,10 +45,11 @@ def upload(file_path:str, chunk_size: int=1000, chunk_overlap:int=0):
 
     # count the number of uploaded documents
     counts = client.query.aggregate("Document").with_meta_count().do()
-    
+    counts = counts['data']['Aggregate']['Document'][0]['meta']['count']
 
 
-    print(f"Document {file_name} uploaded to Weaviate")
+
+    print(f"Document {file_name} uploaded to Weaviate. In total: {counts} documents in Weaviate.")
 
 
 def args():
