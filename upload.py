@@ -59,7 +59,7 @@ def upload_pdf_to_weaviate(pdf_path, chunk_size=1000):
     try:
         client.schema.create(schema)
     except Exception as e:
-        print("Schema might already exist or another error occurred:", e)
+        print("Schema might already exist or another error occurred: Wait for chunking to complete...")
     
     # Chunk the text and upload each chunk
     for chunk in chunk_text(extracted_text, chunk_size):
