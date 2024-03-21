@@ -149,7 +149,7 @@ def args():
 
 if  __name__ == "__main__":
     args = args()
-    print(args)
+    # print(args)
     if args.clean:
         clean()
     elif args.pdf_file:
