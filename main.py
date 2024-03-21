@@ -1,7 +1,7 @@
 from langchain_community.document_loaders import TextLoader
 from langchain_community.vectorstores import Weaviate
 from langchain_text_splitters import CharacterTextSplitter
-from langchain_community.document_loaders import TextLoader
+from pdfminer.high_level import extract_text
 
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from src import database
@@ -9,7 +9,8 @@ import argparse
 import os
 
 
-
+def extract_text_from_pdf(pdf_path):
+    return extract_text(pdf_path)
 
 def clean():
     client = database.create_client()
@@ -18,7 +19,7 @@ def clean():
     print("All documents deleted from Weaviate")
 
 
-def upload(file_path:str, chunk_size: int=1000, chunk_overlap:int=0):
+def upload_txt(file_path:str, chunk_size: int=1000, chunk_overlap:int=0):
     file_name = os.path.basename(file_path)
 
     # check if file exist
@@ -50,9 +51,37 @@ def upload(file_path:str, chunk_size: int=1000, chunk_overlap:int=0):
     counts = client.query.aggregate("Document").with_meta_count().do()
     counts = counts['data']['Aggregate']['Document'][0]['meta']['count']
 
-
-
     print(f"Document {file_name} uploaded to Weaviate. In total: {counts} documents in Weaviate.")
+
+
+def upload_pdf(file_path:str, chunk_size: int=1000, chunk_overlap:int=0):
+    client = database.create_client()
+    client.schema.delete_all()
+    schema = {
+    "classes": [
+        {
+            "class": "Document",
+            "description": "A class to store text documents",
+            "properties": [
+                {
+                    "name": "content",
+                    "dataType": ["text"],
+                    "description": "The content of the document",
+                }
+            ]
+        }
+        ]
+    }
+
+    client.schema.create(schema)
+    extracted_text = extract_text_from_pdf(file_path)
+    document = {
+    "content": extracted_text
+                }
+    client.data_object.create("Document", document)
+
+    return f"Document {file_path} uploaded to Weaviate."
+
 
 
 def args():
@@ -70,10 +99,7 @@ if  __name__ == "__main__":
     if args.clean:
         clean()
     elif args.pdf_file:
-        print(args.pdf_file)
-        loader = TextLoader('test.txt')
-        documents = loader.load()
-        print(documents)
+        upload_pdf(args.pdf_file, args.chunk_size, args.chunk_overlap)
     else:
         print("No input file provided")
         exit(1)
