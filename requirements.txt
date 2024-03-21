@@ -1,0 +1,5 @@
+langchain_community==0.0.29
+langchain_text_splitters==0.0.1
+pdfminer.six==20231228
+python-dotenv==1.0.1
+weaviate_client==4.5.4
