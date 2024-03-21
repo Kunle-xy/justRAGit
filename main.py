@@ -6,7 +6,10 @@ from langchain_community.document_loaders import TextLoader
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from src import database
 import argparse
-import shutils
+import os
+
+
+
 
 def clean():
     client = database.create_client()
@@ -55,7 +58,7 @@ def upload(file_path:str, chunk_size: int=1000, chunk_overlap:int=0):
 def args():
     parser = argparse.ArgumentParser(description="Upload and Index file to Weaviate")
     parser.add_argument("--clean", help="Clean Weaviate", action="store_true")
-    parser.add_argument("--pdf_file", help="Input file", required=True)
+    parser.add_argument("--pdf_file", help="Input file", required=False, type=str)
     parser.add_argument("--chunk_size", help="Chunk size", type=int, default=1000)
     parser.add_argument("--chunk_overlap", help="Chunk overlap", type=int, default=0)
     return parser.parse_args()
@@ -63,7 +66,14 @@ def args():
 
 if  __name__ == "__main__":
     args = args()
+    print(args)
     if args.clean:
         clean()
+    elif args.pdf_file:
+        print(args.pdf_file)
+        loader = TextLoader('test.txt')
+        documents = loader.load()
+        print(documents)
     else:
-        upload(args.pdf_file, args.chunk_size, args.chunk_overlap)
+        print("No input file provided")
+        exit(1)
