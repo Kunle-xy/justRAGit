@@ -42,7 +42,7 @@ Once installation is complete, you're ready to run the main application:
 
 ```bash
 python src/main.py --pdf_file="path/to/your/document.pdf"
-
+```
 
 ### DEMO
 [![Watch the video](https://img.youtube.com/vi/JyvfjnMqRW4/hqdefault.jpg)](https://www.youtube.com/watch?v=JyvfjnMqRW4)
