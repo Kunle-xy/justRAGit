@@ -2,7 +2,6 @@
 
 The Retrieval-Augmented Generation (RAG) Project is designed to transform how we interact with document data, offering a streamlined approach to analyze, vectorize, and comprehend files using state-of-the-art technologies. At the heart of RAG is Weaviate, an AI-powered vector database that facilitates efficient document vectorization. The project leverages the Langchain framework for creating robust data pipelines and Streamlit for crafting interactive user interfaces.
 
-This solution aims to simplify the process of uploading, segmenting, storing, and analyzing PDF documents, allowing for seamless integration with Large Language Models (LLMs) and retrieval-augmented mechanisms.
 
 ## Key Features
 
@@ -33,11 +32,11 @@ Ensure you have Python 3.x installed on your machine. This project relies on sev
     Navigate to the project directory and install the required Python libraries:
 
     ```bash
-    cd path/to/rag-project
+    cd path/to/rag-proect[justRagit]
     pip install -r requirements.txt
     ```
 
-### Usage
+### Usage: Indexing
 
 Once installation is complete, you're ready to run the main application:
 
