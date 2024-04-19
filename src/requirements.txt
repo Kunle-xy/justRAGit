@@ -4,3 +4,8 @@ langchain_text_splitters==0.0.1
 pandas==2.0.3
 python-dotenv==1.0.1
 weaviate_client==4.5.4
+streamlit
+PyPDF2
+# pandas
+# weaviate-client
+# python-dotenv
