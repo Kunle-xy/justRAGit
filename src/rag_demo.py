@@ -101,3 +101,62 @@ if st.button('Retrieve Information'):
         st.warning("Please upload a PDF and enter a query.")
 
 
+
+
+
+
+#TODO
+# import streamlit as st
+# import os
+# import dotenv
+# from langchain_community.document_loaders import PyPDFLoader
+# from langchain_text_splitters import RecursiveCharacterTextSplitter
+# from langchain_community.vectorstores import Weaviate
+# from langchain_openai import OpenAIEmbeddings
+# import database
+
+# # Load environment variables
+# dotenv.load_dotenv()
+# os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+
+# # Initialize Weaviate client
+# client = database.create_client()
+
+# # Streamlit UI
+# st.title('Document Processing and Search with Weaviate')
+
+# uploaded_file = st.file_uploader("Upload a PDF file", type=["pdf"])
+# if uploaded_file is not None:
+#     loader = PyPDFLoader(uploaded_file, extract_images=True)
+#     documents = loader.load()
+
+#     chunked_docs = []
+#     for doc in documents:
+#         splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=250, length_function=len, is_separator_regex=False)
+#         chunks = splitter.create_documents([doc.page_content])
+#         chunked_docs.extend(chunks)
+
+#     embeddings = OpenAIEmbeddings()
+
+#     try:
+#         stored_data = Weaviate.from_documents(
+#             chunked_docs,
+#             embeddings,
+#             client=client,
+#             by_text=False,
+#             index_name="Article",
+#             text_key="content",
+#         )
+#         st.success("Data indexed successfully!")
+#     except Exception as e:
+#         st.error(f"Indexing failed: {e}")
+
+# query = st.text_input("Enter your search query")
+# if st.button('Search'):
+#     vector = embeddings.get_vector(query)
+#     results = client.query.get("Article", ["content"]).with_vector(vector).with_limit(5).do()
+#     if results:
+#         for result in results['data']['Get']['Article']:
+#             st.text(result['content'])
+#     else:
+#         st.warning("No results found.")
