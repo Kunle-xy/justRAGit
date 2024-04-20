@@ -1,0 +1,4 @@
+docker build -t streamlit-app .
+
+
+docker run -e WCS_DEMO_URL="https://my-sandbox-80o922z2.weaviate.network/" -e WCS_DEMO_RO_KEY="VwottcigoyMhzqP8og0mGSme4X6HxPzfmMRR" -p 8501:8501 streamlit-app
