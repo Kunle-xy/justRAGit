@@ -12,7 +12,11 @@ OPENAI_APIKEY = os.getenv("OPENAI_API_KEY")
 def create_client():
     return weaviate.Client(
         url=URL,
-        auth_client_secret=weaviate.AuthApiKey(APIKEY),)
+        auth_client_secret=weaviate.AuthApiKey(APIKEY),
+        additional_headers={
+            "X-OpenAI-Api-Key": OPENAI_APIKEY
+        }
+        )
 #     return weaviate.connect_to_wcs(
 #             cluster_url=URL,  # Replace with your WCS URL
 #             auth_credentials=weaviate.auth.AuthApiKey(APIKEY),
@@ -25,4 +29,5 @@ def create_client():
 
 if __name__ == "__main__":
     client =  create_client()
+
     print(client.is_ready())

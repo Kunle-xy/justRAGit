@@ -3,6 +3,7 @@ import database
 import dotenv
 import pandas as pd
 import argparse
+import json
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -10,9 +11,33 @@ from langchain_community.vectorstores import Weaviate
 from langchain_openai import OpenAIEmbeddings
 
 client = database.create_client()
+collection_name = "Article"
+api_key = os.getenv("OPENAI_API_KEY")
 
-def clean():
-    return client.schema.delete_class("Article")
+import requests
+
+def embed_text(text):
+    global api_key  # Replace with your OpenAI API key
+    url = "https://api.openai.com/v1/embeddings"
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    data = {
+        "model": "text-embedding-3-small",  # Specify the model to use
+        "input": text,
+
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+    if response.status_code == 200:
+        embeddings = response.json()['data']
+        return embeddings
+    else:
+        print("Failed to get embeddings:", response.status_code, response.text)
+
 
 
 if client.is_ready():
@@ -44,6 +69,7 @@ def chunkRecursively(text, chunk_size, chunk_overlap):
 
 
 def index(filename, chunk_size, chunk_overlap):
+    global collection_name
     chunked_doc = []
     for _, doc in enumerate(docLoader(filename)):
         chunked_doc.append(chunkRecursively(doc.page_content, chunk_size, chunk_overlap)) # 25% overlap
@@ -51,29 +77,59 @@ def index(filename, chunk_size, chunk_overlap):
     vector_store = []
     for item in chunked_doc:
         for doc in item:
-            vector_store.append(doc)
+            vector_store.append(doc.page_content)
+
+    chunk_class = {
+        "class": collection_name,
+        "properties": [
+            {
+                "name": "chunk",
+                "dataType": ["text"],
+            },
+            {
+                "name": "chunk_index",
+                "dataType": ["int"],
+            }
+        ],
+        "vectorizer": "text2vec-openai",  # Use `text2vec-openai` as the vectorizer
+        "moduleConfig": {
+            "text2vec-openai": {
+            "model": "text-embedding-3-small", 
+            "dimensions": 1536, # Example model, specify the model you have access to
+            "tokenization": True,         # Enables tokenization if necessary
+        }       # Use `generative-openai` with default parameters
+        }
+    }
+
+    if client.schema.exists(collection_name):  # In case we've created this collection before
+        client.schema.delete_class(collection_name)
+    client.schema.create_class(chunk_class)
+
+    
+    client.batch.configure(batch_size=100)
+    with client.batch as batch:
+        for i, chunk in enumerate(vector_store):
+            data_object = {
+                "chunk": chunk,
+                "chunk_index": i
+            }
+            batch.add_data_object(data_object=data_object, class_name=collection_name)
+
+    print("Data indexed successfully!")
+    response = client.query.aggregate(collection_name).with_meta_count().do()
+    print(response)
 
 
-    embeddings = OpenAIEmbeddings()
-    try:
-            storedData = Weaviate.from_documents(
-                vector_store,
-                embeddings,
-                client=client,
-                by_text=False,
-                index_name="Article",
-                text_key="content",
-                )
-            
-            if storedData:
-                print("Data indexed successfully!")
+#TOP-K QUERIES
+def queries(query:str, top_k:int):
+    global collection_name
+    q_embeddings = {
+        'vector': embed_text(query)[0]['embedding']
+    }
 
-    except Exception as e:
-        print(e)
+    result = client.query.get(collection_name, ["chunk"]).with_near_vector(q_embeddings).with_limit(top_k).with_additional(['certainty']).do()
 
-    finally:
-        print("All data indexed successfully!")
-
+    print(json.dumps(result, indent=4))
 
 
 def args():
@@ -81,15 +137,23 @@ def args():
     parser.add_argument("--pdf_file", help="Input file", required=False, type=str)
     parser.add_argument("--chunk_size", help="Chunk size", type=int, default=1000)
     parser.add_argument("--chunk_overlap", help="Chunk overlap", type=int, default=250)
+    parser.add_argument("--top_k", help="Top K results", type=int, default=10)
     return parser.parse_args()
 
 
 if  __name__ == "__main__":
     args = args()
     # print(args)
-
     if args.pdf_file:
         index(args.pdf_file, args.chunk_size, args.chunk_overlap)
     else:
         print("No input file provided")
         exit(1)
+    
+    while True:
+        query = input("Enter your query (or 'q' to quit): ")
+        if query == 'q':
+            print("Exiting...")
+            break
+        queries(query, args.top_k)
+
