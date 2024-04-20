@@ -9,3 +9,11 @@ PyPDF2
 # pandas
 # weaviate-client
 # python-dotenv
+openai
+
+
+llama_index==0.10.19
+numpy==1.24.4
+transformers==4.38.2
+psycopg2-binary>=2.9
+llama-index-embeddings-huggingface==0.1.4
