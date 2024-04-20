@@ -11,6 +11,12 @@ from langchain_community.vectorstores import Weaviate
 from langchain_openai import OpenAIEmbeddings
 
 client = database.create_client()
+if client.is_ready():
+    print("Weaviate is ready!")
+else:
+    print("Weaviate is not ready!")
+
+    
 collection_name = "Article"
 api_key = os.getenv("OPENAI_API_KEY")
 
@@ -40,10 +46,7 @@ def embed_text(text):
 
 
 
-if client.is_ready():
-    print("Weaviate is ready!")
-else:
-    print("Weaviate is not ready!")
+
 
 
 dotenv.load_dotenv()
