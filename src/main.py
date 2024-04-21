@@ -9,6 +9,10 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Weaviate
 from langchain_openai import OpenAIEmbeddings
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_community.chat_models import ChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
 
 client = database.create_client()
 if client.is_ready():
@@ -43,11 +47,6 @@ def embed_text(text):
         return embeddings
     else:
         print("Failed to get embeddings:", response.status_code, response.text)
-
-
-
-
-
 
 dotenv.load_dotenv()
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
@@ -129,10 +128,31 @@ def queries(query:str, top_k:int):
     q_embeddings = {
         'vector': embed_text(query)[0]['embedding']
     }
-
+    context = ""
     result = client.query.get(collection_name, ["chunk"]).with_near_vector(q_embeddings).with_limit(top_k).with_additional(['certainty']).do()
+    for res in result['data']['Get']['Article']:
+        context += res['chunk'] + "\n\n" 
+    return context
 
-    print(json.dumps(result, indent=4))
+#Answering queries
+def answer_query(query:str, context:str):
+    template = """You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question.\
+          If you don't know the answer, just say that you don't know. Use three sentences maximum and keep the answer concise.
+    Question: {question}
+    Context: {context}
+    Answer:
+    """
+    prompt = ChatPromptTemplate.from_template(template)
+    llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+
+    rag_chain = (
+    {"context": lambda x: context, "question": RunnablePassthrough()}
+    | prompt
+    | llm
+    | StrOutputParser()
+)
+
+    return rag_chain.invoke(f"{query}")
 
 
 def args():
@@ -140,7 +160,7 @@ def args():
     parser.add_argument("--pdf_file", help="Input file", required=False, type=str)
     parser.add_argument("--chunk_size", help="Chunk size", type=int, default=1000)
     parser.add_argument("--chunk_overlap", help="Chunk overlap", type=int, default=250)
-    parser.add_argument("--top_k", help="Top K results", type=int, default=10)
+    parser.add_argument("--top_k", help="Top K results", type=int, default=5)
     return parser.parse_args()
 
 
@@ -158,5 +178,6 @@ if  __name__ == "__main__":
         if query == 'q':
             print("Exiting...")
             break
-        queries(query, args.top_k)
+        context = queries(query, args.top_k)
+        print(answer_query(query, context))
 
