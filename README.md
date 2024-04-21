@@ -36,14 +36,22 @@ Ensure you have Python 3.x installed on your machine. This project relies on sev
     pip install -r requirements.txt
     ```
 
-### Usage: Indexing
+3. ### Usage: Indexing
 
 Once installation is complete, you're ready to run the main application:
 
 ```bash
 python src/main.py --pdf_file="path/to/your/document.pdf"
 ```
+4. ### Usage: Embedding and Retrieval
+   
+Retrive text data based on given query.
+Uses gpt-3.5-turbo-0613 model to generate answer
+index two sample files from directory named 'pdf'
+returns the answers based on top 5 
 
 ### DEMO
-[![Watch the video](https://img.youtube.com/vi/JyvfjnMqRW4/hqdefault.jpg)](https://www.youtube.com/watch?v=JyvfjnMqRW4)
+First step: [![Watch the video](https://img.youtube.com/vi/JyvfjnMqRW4/hqdefault.jpg)](https://www.youtube.com/watch?v=JyvfjnMqRW4)
+
+Second step: https://www.youtube.com/watch?v=HD_PS3HMkCk
 
