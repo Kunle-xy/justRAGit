@@ -51,7 +51,7 @@ index two sample files from directory named 'pdf'
 returns the answers based on top 5 
 
 ### DEMO
-First step: [![Watch the video](https://img.youtube.com/vi/JyvfjnMqRW4/hqdefault.jpg)](https://www.youtube.com/watch?v=JyvfjnMqRW4)
+Video for first miletone : [![Watch the video](https://img.youtube.com/vi/JyvfjnMqRW4/hqdefault.jpg)](https://www.youtube.com/watch?v=JyvfjnMqRW4)
 
-Second step: https://www.youtube.com/watch?v=HD_PS3HMkCk
+Video for second milestone: https://www.youtube.com/watch?v=HD_PS3HMkCk
 
