@@ -50,6 +50,9 @@ Uses gpt-3.5-turbo-0613 model to generate answer
 index two sample files from directory named 'pdf'
 returns the answers based on top 5 
 
+5. ### Running GUI
+use streamlit run gui.py
+
 ### DEMO
 Video for first miletone : [![Watch the video](https://img.youtube.com/vi/JyvfjnMqRW4/hqdefault.jpg)](https://www.youtube.com/watch?v=JyvfjnMqRW4)
 
